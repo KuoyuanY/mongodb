@@ -14,14 +14,14 @@ MongoClient.connect(url, (err, db) => {
       db.close();
   });
 });
-function member(Fname, Lname, name, id, score){
+function member(Fname, Lname, name, id, score){//member class
     this.Fname = Fname;
     this.Lname = Lname;
     this.name = name;
     this.id = id;
     this.score = score;
 
-    member.prototype.Json = function Json(){
+    member.prototype.Json = function Json(){//returns json format of the member
         var json = {
             "First Name" : Fname,
             "Last Name" : Lname,
@@ -33,24 +33,92 @@ function member(Fname, Lname, name, id, score){
     }
 }
 
-function insert(db, object, callback){//insert document
-    db.collection('members').insertOne(object, (err, result) => {
-    assert.equal(err, null);
-    console.log("Inserted a document into the members collection.");
-    callback();
+function insert(db, object, collection, callback){//insert document
+    db.collection(collection).insertOne(object, (err, result) => {
+        assert.equal(err, null);
+        console.log("Inserted a document into the members collection.");
+        callback();
     });
 }
 
 function deleteCol(db, collection, callback){//delete a collection
-    db.collection(collection).drop( (err, response) => {
-      console.log(response);
-      callback();
+    db.collection(collection).drop((err, response) => {
+        console.log(response);
+        callback();
     });
 }
 
-function deleteDoc(db, object, callback){//delete document
-    db.collection('restaurants').deleteOne(object, (err, results) => {
+function deleteDoc(db, object, collection, callback){//delete a document that satisfy the condition(object)
+    db.collection(collection).deleteOne(object, (err, results) => {
          console.log(results);
          callback();
     });
 }
+
+function deleteMultiDoc(db, object, collection, callback){//delete all documents that satisfy the condition
+    db.collection(collection).deleteMany(object, (err, results) => {//object(condition) can be a field for a document
+         console.log(results);
+         callback();
+    });
+}
+
+function getAllDoc(db, collection, callback) {//return all documents in a collection
+   var cursor = db.collection(collection).find( );
+   cursor.each(function(err, doc) {
+       assert.equal(err, null);
+       if (doc != null) {
+           console.dir(doc);
+       } else {
+           callback();
+       }
+   });
+};
+
+function findDoc(db, object, collection, callback) {//returns the document that satisfy condition
+   var cursor =db.collection(collection).find(object);
+   cursor.each(function(err, doc) {
+       assert.equal(err, null);
+       if (doc != null) {
+           console.dir(doc);
+       } else {
+           callback();
+       }
+   });
+};
+//Conditions can be specified by operators : $gt, $lt,
+//{ <field1>: { <operator1>: <value1> } }
+//{ "grades.score": { $gt: 30 }
+
+//logical or : $or
+//$or: [ { "cuisine": "Italian" }, { "address.zipcode": "10075" } ]
+
+function updateDoc(db, condition, collection, callback) {
+   db.collection(collection).updateOne(
+       condition,
+       {
+           $set: { "FIELD": "NEW VALUE" }, //changes a field
+           $currentDate: { "lastModified": true } //changes current date?
+       }, function(err, results) {
+           console.log(results);
+           callback();
+       });
+};
+
+function updateMultiDoc(db, condition, collection, callback) {
+    db.collection(collection).updateMany(
+        condition,
+        {
+            $set: { "FIELD": "NEW VALUE" }, //changes a field
+            $currentDate: { "lastModified": true } //changes current date?
+        }, function(err, results) {
+            console.log(results);
+            callback();
+    });
+};
+
+function replaceDoc(db, condition, newDoc, collection, callback) {//replaces a document
+   db.collection(collection).replaceOne(condition, newDoc, function(err, results) {
+       console.log(results);
+       callback();
+   });
+};
