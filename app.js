@@ -32,10 +32,25 @@ function member(Fname, Lname, name, id, score){
         return json;
     }
 }
-function insert(db, object, callback){
+
+function insert(db, object, callback){//insert document
     db.collection('members').insertOne(object, (err, result) => {
     assert.equal(err, null);
     console.log("Inserted a document into the members collection.");
     callback();
-  });
+    });
+}
+
+function deleteCol(db, collection, callback){//delete a collection
+    db.collection(collection).drop( (err, response) => {
+      console.log(response);
+      callback();
+    });
+}
+
+function deleteDoc(db, object, callback){//delete document
+    db.collection('restaurants').deleteOne(object, (err, results) => {
+         console.log(results);
+         callback();
+    });
 }
